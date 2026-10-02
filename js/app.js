@@ -2,6 +2,7 @@ import { state, setItems, resetGameExcluded, getActiveItems } from './core/state
 import { runSeries } from './core/series.js';
 import { drawWheel, spinToItem } from './ui/wheel.js';
 import { audio } from './services/audio.js';
+import { getSelectionProbabilities } from './core/engine.js';
 import { showExcludePrompt } from './ui/modal.js';
 
 const rangeMin = document.getElementById('rangeMin');
@@ -100,19 +101,23 @@ function parseInlineNames(raw) {
 }
 
 function updateProbability() {
-    const total = getActiveItems().length;
-
     if (!probabilityBlock) return;
-
-    if (total === 0) {
-        probabilityBlock.innerHTML = 'Нет секторов для расчёта';
+    const probabilities = getSelectionProbabilities();
+    if (!probabilities.length) {
+        probabilityBlock.textContent = 'Нет секторов для расчёта';
         return;
     }
-
-    const baseChance = (100 / total).toFixed(2);
-
-    probabilityBlock.innerHTML =
-        `Вероятность выпадения любого сектора: <strong>${baseChance}%</strong>`;
+    const target = state.settings.biasEnabled
+        ? probabilities.find(item => item.id === state.settings.biasTarget)
+        : null;
+    if (target && probabilities.length > 1) {
+        const other = probabilities.find(item => item.id !== target.id);
+        probabilityBlock.textContent =
+            `Режим неравных вероятностей: сектор ${target.id} — ${(target.probability * 100).toFixed(2)}%; каждый другой — ${(other.probability * 100).toFixed(2)}%.`;
+    } else {
+        probabilityBlock.textContent =
+            `Вероятность выпадения любого сектора: ${(probabilities[0].probability * 100).toFixed(2)}%`;
+    }
 }
 
 modeRadios.forEach(radio => {
@@ -171,11 +176,13 @@ biasEnabled.addEventListener('change', () => {
         biasTargetID.value = '';
         state.settings.biasTarget = null;
     }
+    updateProbability();
 });
 
 biasTargetID.addEventListener('input', () => {
     const val = parseInt(biasTargetID.value);
     state.settings.biasTarget = isNaN(val) ? null : val;
+    updateProbability();
 });
 
 soundToggle.addEventListener('change', () => {
@@ -357,6 +364,7 @@ async function handleStart() {
 
         drawWheel();
         addHistory(results);
+        updateProbability();
     } catch (e) {
         alert(e.message);
     } finally {

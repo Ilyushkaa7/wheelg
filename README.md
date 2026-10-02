@@ -37,8 +37,8 @@ The main idea was minimalism, a smooth user experience, and a Liquid Glass style
 - Multiple spins in one series
 - Slow, normal, fast, and thrill speed modes
 - Optional sound
-- Result history
-- Bias mode by ID with about 75% probability
+- Result history for the current session
+- Explicit bias mode: 75% for an available target when at least two sectors remain
 - Desktop-focused interface
 - Custom domain connected through GitHub Pages
 
@@ -90,7 +90,9 @@ JSON example:
 
 The app has a controlled probability mode.
 
-If bias mode is enabled and a target ID is entered, this ID has about a 75% chance to be selected. This feature was part of the assignment requirements and is useful for demonstrating controlled random behavior.
+When bias mode is enabled and the target ID is available, the target has a 75% chance and the remaining 25% is shared equally between other available sectors. A single remaining sector has a 100% chance. If the target is unavailable, selection is uniform. The interface displays these per-spin probabilities; exclusions can change them between spins in a series.
+
+This is an explicit demonstration of weighted selection, included in the college assignment. Turn bias mode off for equal probabilities.
 
 ## Tech Stack
 
@@ -117,7 +119,7 @@ AI tools helped me speed up development, but the product idea, minimal design di
 
 The project won the college group contest for the fortune wheel assignment.
 
-This project is important for my portfolio because it shows not only code, but also product thinking: understanding the task, removing unnecessary features, polishing the user experience, and presenting the result clearly.
+The project combines input validation, Canvas animation, random selection and a deployed browser interface.
 
 ## Project Status
 
